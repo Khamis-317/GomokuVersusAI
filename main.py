@@ -1,14 +1,21 @@
 import customtkinter as ctk
+from gui.start_menu import StartMenu
 
-app = ctk.CTk()  # create the Tk window like you normally do
-app.geometry("800x600")
-app.title("CustomTkinter Test")
+# Main window class
+class App(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.geometry("800x600")
+        self.title("Gomoku")
 
-def button_function():
-    print("button pressed")
+if __name__ == "__main__":
+    # setup
+    ctk.set_appearance_mode("dark")    # "light", "dark", "system"
+    ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+    app = App()
+    app.configure(fg_color = ("#363e47"))
 
-# Use CTkButton instead of tkinter Button
-button = ctk.CTkButton(master=app, corner_radius=10, command=button_function)
-button.place(relx=0.5, rely=0.5, anchor=ctk.CENTER)
-
-app.mainloop()
+    start_menu = StartMenu(app)
+    start_menu.show()
+    
+    app.mainloop()
