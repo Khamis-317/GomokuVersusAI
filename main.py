@@ -1,6 +1,5 @@
 import customtkinter as ctk
 from gui.start_menu import StartMenu
-from gui.game import GameScreen
 
 # Main window class
 class App(ctk.CTk):
@@ -16,8 +15,7 @@ if __name__ == "__main__":
     app = App()
     app.configure(fg_color = ("#363e47"))
 
-    game_screen = GameScreen(app)
-    start_menu = StartMenu(app, game_screen)
-
+    start_menu = StartMenu(app)
     start_menu.show()
+    
     app.mainloop()

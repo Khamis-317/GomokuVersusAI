@@ -11,6 +11,4 @@ class BaseScreen(ctk.CTkFrame):
     def hide(self):
         self.pack_forget()
     
-    def switch_screen(self, current_screen, new_screen):
-        current_screen.hide()
-        new_screen.show()
+  
