@@ -3,9 +3,13 @@ class Minimax:
         self.cSize = cSize
         self.rSize = rSize
         self.maxDepth = depth
+    
+    
+    #O(M * N) * 2 -> O(M * N)  
     def is_terminal(self, board):
         return self.evaluate(board) != 0 or not self.getAllAvaliableMove(board)
-        
+    
+    #O(8*5) -> O(C)
     def check_win(self,board,row,col,player):
         dx = [1,0,1,1,0,-1,-1,-1]
         dy = [0,1,1,-1,-1,-1,0,1]
@@ -26,7 +30,7 @@ class Minimax:
             if cnt == 5:
                 return True
         return False
-            
+    #O(cSize * rSize) -> O(M * N)  
     def evaluate(self, board):
         #Return  2  in case AI won
         #Return  0  in case  draw or nothing
@@ -40,17 +44,19 @@ class Minimax:
                    return 2 if player == 1 else -2
         return 0 
     
-    
+    #O(cSize * rSize) -> O(M * N)  
     def getAllAvaliableMove(self,board):
         #Return avaliable move
         return [(i, j) for i in range(self.rSize) for j in range(self.cSize) if board[i][j] == 0]
         
     def minimax_algo(self,board,maxPlayer,depth):
-        if(self.is_terminal(board) or depth == 0):
-            return self.evaluate(board)
+        #O(M * N)^2
+        if(self.is_terminal(board) or depth == 0): #O(M * N)  
+            return self.evaluate(board) #O(M * N)  
         if(maxPlayer):
             maxEval = float('-inf')
             for move in self.getAllAvaliableMove(board):
+                # branching factor -> O(M * N)
                 board[move[0]][move[1]] = 1 #Do move
                 currEval = self.minimax_algo(board, False, depth-1) #backtrack 
                 board[move[0]][move[1]] = 0 #Undo
@@ -68,7 +74,7 @@ class Minimax:
     def make_move(self,board):
         best_val = float('-inf')
         best_move = None
-        for move in self.getAllAvaliableMove(board):
+        for move in self.getAllAvaliableMove(board): #O(M * N)  
             board[move[0]][move[1]] = 1;
             move_val = self.minimax_algo(board,False,self.maxDepth)
             board[move[0]][move[1]] = 0;
