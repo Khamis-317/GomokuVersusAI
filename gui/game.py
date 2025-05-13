@@ -3,10 +3,11 @@ import tkinter as tk
 from gui.base import BaseScreen
 
 
+
 class GameScreen(BaseScreen):
     def __init__(self, parent_frame, M, N, game_mode):
         super().__init__(parent_frame, fg_color="#363e47", width=800, height=600)
-
+        self.parent_frame = parent_frame
         self.M, self.N = M, N
         self.cell_size = 40
         self.board = []
@@ -31,7 +32,7 @@ class GameScreen(BaseScreen):
         self.back_button = ctk.CTkButton(
             button_frame,
             text="Back",
-            command=None,
+            command=self.back_button,
             font=ctk.CTkFont("Arial", 18),
             text_color="white"
         )
@@ -108,16 +109,32 @@ class GameScreen(BaseScreen):
                 if self.board[row][col] == 0:
                     return row, col
 
-
     def start_game(self):
         self.game_started = True
         self.start_button.configure(state="disabled")
+        self.reset_button.configure(state="enabled")
+        self.back_button.configure(state="disabled")
         if (self.game_mode == "AI vs AI"):
             self.next_move()
 
     def reset_game(self):
         self.game_started = False
         self.start_button.configure(state="normal")
+        for i in range(self.M):
+            for j in range(self.N):
+                self.board[i][j] = 0
+        self.canvas.delete("all")
+        self.draw_grid()
+        self.turn = 1
+        self.back_button.configure(state="normal")
+        self.reset_button.configure(state="disabled")
+
+    def back_button(self):
+        from gui.start_menu import StartMenu
+        self.destroy()
+        start_menu = StartMenu(self.parent_frame)
+        start_menu.show()
+
 
 
 
