@@ -24,7 +24,6 @@ class Player:
         return self.strategy.makeMove(x, y)
         
 
-
 class HumanPlayerStrategy(PlayMoveStrategy):
     def makeMove(self, x, y):
         x = int(input("Enter X coordinate: "))
@@ -33,7 +32,9 @@ class HumanPlayerStrategy(PlayMoveStrategy):
 
     
 class MinMaxAIPlayerStrategy(PlayMoveStrategy):
-    pass
+    def makeMove(self, x, y):
+        pass
 
 class AlphaBetaAIPlayerStrategy(PlayMoveStrategy):
-    pass
+    def makeMove(self, x, y):
+        pass
