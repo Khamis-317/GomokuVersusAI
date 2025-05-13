@@ -33,3 +33,18 @@ class Instructions(BaseScreen):
             width=700,
             anchor="center"
         ).pack(pady=20)
+
+        self.back_button = ctk.CTkButton(
+            self,
+            text="Back",
+            command=self.back_to_menu,
+            font=ctk.CTkFont("Arial", 18),
+            text_color="white"
+        )
+        self.back_button.place(relx=0.11, rely=0.1, anchor=ctk.CENTER)
+
+    def back_to_menu(self):
+        from gui.start_menu import StartMenu
+        self.destroy()
+        start_menu = StartMenu(self.app_frame)
+        start_menu.show()
