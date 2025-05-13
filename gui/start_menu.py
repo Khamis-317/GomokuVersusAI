@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from gui.base import BaseScreen
 from gui.game import GameScreen
+from gui.instructions_page import Instructions
 
 class StartMenu(BaseScreen):
     def __init__(self, parent_frame):
@@ -28,7 +29,10 @@ class StartMenu(BaseScreen):
         self.game_mode_options = ctk.CTkOptionMenu(self, width=135, height=20, values=["Human vs AI", "AI vs AI"])
         self.game_mode_options.place(relx=0.55, rely=0.65, anchor=ctk.W)
 
-        self.button = ctk.CTkButton(self, height=35, text="Create Board", command=self.init_game)
+        self.button = ctk.CTkButton(self, height=25,width=50, text="How To Play", command=self.show_instructions)
+        self.button.place(relx=0.71, rely=0.85, anchor=ctk.CENTER)
+
+        self.button = ctk.CTkButton(self, height=35,text="Create Board", command=self.init_game)
         self.button.place(relx=0.5, rely=0.85, anchor=ctk.CENTER)
 
     def init_game(self):
@@ -41,4 +45,9 @@ class StartMenu(BaseScreen):
             game_screen.show()
         except:
             print('Invalid Input')
-       
+
+
+    def show_instructions(self):
+        instructions_screen = Instructions(self.app_frame)
+        self.hide()
+        instructions_screen.show()
