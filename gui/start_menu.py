@@ -28,7 +28,7 @@ class StartMenu(BaseScreen):
         self.game_mode_options = ctk.CTkOptionMenu(self, width=135, height=20, values=["Human vs AI", "AI vs AI"])
         self.game_mode_options.place(relx=0.55, rely=0.65, anchor=ctk.W)
 
-        self.button = ctk.CTkButton(self, height=35, text="Start Game", command=self.init_game)
+        self.button = ctk.CTkButton(self, height=35, text="Create Board", command=self.init_game)
         self.button.place(relx=0.5, rely=0.85, anchor=ctk.CENTER)
 
     def init_game(self):
