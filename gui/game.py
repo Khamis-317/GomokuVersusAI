@@ -3,19 +3,19 @@ import tkinter as tk
 from gui.base import BaseScreen
 
 class GameScreen(BaseScreen):
-    def __init__(self, parent_frame, N, M, game_mode):
+    def __init__(self, parent_frame, ROWS, COLS, game_mode):
         super().__init__(parent_frame, fg_color="#363e47", width=800, height=600)
         self.parent_frame = parent_frame
-        self.M = M #col
-        self.N = N #row
+        self.M = ROWS  # number of rows
+        self.N = COLS  # number of cols
         self.cell_size = 40
         self.board = []
-        self.margin = 20
+        self.round_count = 0
         self.game_started = False
         self.turn = 1
         self.game_mode = game_mode
-        for i in range(M):
-            row = [0] * N
+        for i in range(ROWS):
+            row = [0] * COLS
             self.board.append(row)
 
         #Title
@@ -61,8 +61,8 @@ class GameScreen(BaseScreen):
         self.reset_button.grid(row=0, column=2, padx=10)
 
         #Canvas setup
-        w = N * self.cell_size  + self.margin * 2
-        h = M * self.cell_size  + self.margin * 2
+        w = COLS * self.cell_size + self.margin  ##should add margin
+        h = ROWS * self.cell_size + self.margin
 
         self.canvas = tk.Canvas(self, bg="#363e47", width=w, height=h, highlightthickness=0)
         self.canvas.pack()
@@ -78,34 +78,50 @@ class GameScreen(BaseScreen):
             self.ai_player = "Minimax" #Going to change
 
     def click(self, event):
-        col = round((event.x - self.margin) / self.cell_size)
-        row = round((event.y - self.margin) / self.cell_size)
-        if self.game_started and self.game_mode == "Human vs AI" and self.turn == 1:
-            self.add_point(row, col, "black")
-            if not self.check_win():
-                self.turn = 2
-                self.after(300, self.ai_move)
+        if self.game_started:
+            if self.game_mode == "Human vs AI" and self.turn == 1:
+                if(self.is_board_full()):
+                    self.game_started = False
+                col = round((event.x - self.margin) / self.cell_size)
+                row = round((event.y - self.margin) / self.cell_size)
+                if self.add_point(row, col):
+                    self.round_count += 1
+                    self.draw_point(row, col, "black")
+                    win = self.check_win(row, col)
+                    if win is not None:
+                        self.game_started = False
+                        self.canvas.create_line(win[0][0], win[0][1], win[1][0], win[1][1], fill="yellow", width=5)
+                    else:
+                        self.turn = 2
+                        self.after(300, self.ai_move)
         else:
-            pass #flagging win
+            print("Game is finished!")
 
 
     def ai_move(self):
+        if(self.is_board_full()):
+            self.game_started = False
         if not self.game_started:
-            return 0
+            print("Game is finished!")
+            return
         if self.turn == 1:
             row, col = self.dummy() #replace by alpha beta get move <<<<
         else:
             row, col = self.dummy() #replace by minmax get move <<<<<
 
         color = "white" if self.turn == 1 else "red"
-        self.add_point(row, col, color)
+        if self.add_point(row, col):
+            self.round_count += 1
+            self.draw_point(row, col, color)
 
-        if not self.check_win():
+        win = self.check_win(row, col)
+        if win is None:
             self.turn = 1 if self.turn == 2 else 2 #At human vs. ai mode this line behaves the same as turn = 1(human)
             if self.game_mode == "AI vs AI":
                 self.after(300, self.ai_move) #recurse with another AI algo
         else:
-            pass #flagging win
+            self.game_started = False
+            self.canvas.create_line(win[0][0], win[0][1], win[1][0], win[1][1], fill="yellow", width=5)
 
     def start_game(self):
         self.game_started = True
@@ -134,15 +150,45 @@ class GameScreen(BaseScreen):
         start_menu.show()
 
 
-    def check_win(self):
-        pass
+    def check_win(self, row, col):
+        WINNING_SEQ = 5
+        dx = [1,0,1,1,0,-1,-1,-1]
+        dy = [0,1,1,-1,-1,-1,0,1]
+        # check 8 directions
+        #(-1,-1) | ( 0,-1) | (+1,-1)
+        #(-1, 0) | (row, col) | (+1, 0)
+        #(-1, +1) | ( 0, +1) | (-1, +1)
+        r = 0
+        c = 0
+        # check for a wining sequence at each direction around the last played cell
+        for dr, dc in zip(dx,dy):
+            # skipping the current cell and starting the count at 1
+            count = 1
+            for i in range(1, 5):
+                r,c = row + dr * i , col + dc * i
+                if 0 <= r < self.M and 0 <= c < self.N and self.board[r][c] == self.board[row][col]:
+                    count += 1
+                else:
+                    break
+            if count == WINNING_SEQ:
+                x1 = col * self.cell_size + self.margin
+                y1 = row * self.cell_size + self.margin
+                x2 = c * self.cell_size + self.margin
+                y2 = r * self.cell_size + self.margin
+                # return the start and end of the winning sequence
+                return ((x1, y1), (x2, y2))
+        return None
 
+    def is_board_full(self):
+        return self.round_count == self.M*self.N
     # Canvas Drawing
 
-    def add_point(self, row, col, color):
+    def add_point(self, row, col):
         if 0 <= row < self.M and 0 <= col < self.N and self.board[row][col] == 0:
             self.board[row][col] = 1 if self.turn == 1 else 2
-            self.draw_point(row, col, color)
+            return True
+        return False
+
 
     def draw_point(self, row, col, color):
         x = self.margin + (col * self.cell_size)
