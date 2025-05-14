@@ -78,8 +78,8 @@ class GameScreen(BaseScreen):
             self.ai_player = "Minimax" #Going to change
 
     def click(self, event):
-        col = round((event.x) / self.cell_size)
-        row = round((event.y) / self.cell_size)
+        col = round((event.x - self.margin) / self.cell_size)
+        row = round((event.y - self.margin) / self.cell_size)
         if self.game_started and self.game_mode == "Human vs AI" and self.turn == 1:
             self.add_point(row, col, "black")
             if not self.check_win():
