@@ -37,10 +37,10 @@ class StartMenu(BaseScreen):
 
     def init_game(self):
         try:
-            M = int(self.width_entry.get())
-            N = int(self.height_entry.get())
+            ROWS = int(self.height_entry.get())
+            COLS = int(self.width_entry.get())
             game_mode = self.game_mode_options.get() 
-            game_screen = GameScreen(self.app_frame, M, N, game_mode)
+            game_screen = GameScreen(self.app_frame, ROWS, COLS, game_mode)
             self.hide()
             game_screen.show()
         except:
