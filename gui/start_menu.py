@@ -40,20 +40,20 @@ class StartMenu(BaseScreen):
         instructions_button.place(relx=0.4, rely=0.85, anchor=ctk.CENTER)
 
     def init_game(self):
+        ROWS = int(self.height_entry.get())
+        COLS = int(self.width_entry.get())
         try:
-            ROWS = int(self.height_entry.get())
-            COLS = int(self.width_entry.get())
             if(ROWS < 5 or COLS < 5):
                 raise InvalidInputException("Both board width and height must be greater than or equal 5")
-            game_mode = self.game_mode_options.get() 
-            game_screen = GameScreen(self.app_frame, ROWS, COLS, game_mode)
-            self.hide()
-            game_screen.show()
         except InvalidInputException as e:
             self.error_label.configure(text=e)
         except:
             self.error_label.configure(text="Invalid input")
-
+        else:
+            game_mode = self.game_mode_options.get()
+            game_screen = GameScreen(self.app_frame, ROWS, COLS, game_mode)
+            self.hide()
+            game_screen.show()
 
     def show_instructions(self):
         instructions_screen = Instructions(self.app_frame)

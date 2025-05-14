@@ -9,6 +9,7 @@ class GameScreen(BaseScreen):
         self.M = ROWS  # number of rows
         self.N = COLS  # number of cols
         self.cell_size = 40
+        self.margin = 20
         self.board = []
         self.round_count = 0
         self.game_started = False
