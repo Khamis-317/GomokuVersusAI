@@ -128,7 +128,7 @@ class GameScreen(BaseScreen):
         win = self.check_win(row, col)
         if win is None:
             if (self.is_board_full()):
-                game_started = False
+                self.game_started = False
                 self.display_draw_message()
             else:
                 self.turn = 1 if self.turn == 2 else 2 #At human vs. ai mode this line behaves the same as turn = 1(human)
