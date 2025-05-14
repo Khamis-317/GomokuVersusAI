@@ -10,6 +10,7 @@ class GameScreen(BaseScreen):
         self.N = COLS  # number of cols
         self.cell_size = 40
         self.board = []
+        self.round_count = 0
         self.game_started = False
         self.turn = 1
         self.game_mode = game_mode
@@ -77,33 +78,42 @@ class GameScreen(BaseScreen):
             self.ai_player = "Minimax" #Going to change
 
     def click(self, event):
-        col = round((event.x) / self.cell_size)
-        row = round((event.y) / self.cell_size)
-        if self.game_started and self.game_mode == "Human vs AI" and self.turn == 1:
-            available = self.add_point(row, col, "black")
-            win = self.check_win(row, col)
-            if available:
-                if win:
+        if self.game_started:
+            if self.game_mode == "Human vs AI" and self.turn == 1:
+                if(self.is_board_full()):
                     self.game_started = False
-                    self.check_win(row, col)
-                    self.canvas.create_line(win[0][0], win[0][1], win[1][0], win[1][1], fill="yellow", width=5)
-                else:
-                    self.turn = 2
-                    self.after(300, self.ai_move)
+                col = round((event.x) / self.cell_size)
+                row = round((event.y) / self.cell_size)
+                if self.add_point(row, col):
+                    self.round_count += 1
+                    self.draw_point(row, col, "black")
+                    win = self.check_win(row, col)
+                    if win is not None:
+                        self.game_started = False
+                        self.canvas.create_line(win[0][0], win[0][1], win[1][0], win[1][1], fill="yellow", width=5)
+                    else:
+                        self.turn = 2
+                        self.after(300, self.ai_move)
         else:
-            pass
+            print("Game is finished!")
 
 
     def ai_move(self):
+        if(self.is_board_full()):
+            self.game_started = False
         if not self.game_started:
-            return 0
+            print("Game is finished!")
+            return
         if self.turn == 1:
             row, col = self.dummy() #replace by alpha beta get move <<<<
         else:
             row, col = self.dummy() #replace by minmax get move <<<<<
 
         color = "white" if self.turn == 1 else "red"
-        self.add_point(row, col, color)
+        if self.add_point(row, col):
+            self.round_count += 1
+            self.draw_point(row, col, color)
+
         win = self.check_win(row, col)
         if win is None:
             self.turn = 1 if self.turn == 2 else 2 #At human vs. ai mode this line behaves the same as turn = 1(human)
@@ -170,13 +180,13 @@ class GameScreen(BaseScreen):
                 return ((x1, y1), (x2, y2))
         return None
                 
-
+    def is_board_full(self):
+        return self.round_count == self.M*self.N
     # Canvas Drawing
 
-    def add_point(self, row, col, color):
+    def add_point(self, row, col):   
         if 0 <= row < self.M and 0 <= col < self.N and self.board[row][col] == 0:
             self.board[row][col] = 1 if self.turn == 1 else 2
-            self.draw_point(row, col, color)
             return True
         return False
 
