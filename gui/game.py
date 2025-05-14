@@ -3,13 +3,14 @@ import tkinter as tk
 from gui.base import BaseScreen
 
 class GameScreen(BaseScreen):
-    def __init__(self, parent_frame, M, N, game_mode):
+    def __init__(self, parent_frame, N, M, game_mode):
         super().__init__(parent_frame, fg_color="#363e47", width=800, height=600)
         self.parent_frame = parent_frame
-        self.M = M
-        self.N = N
+        self.M = M #col
+        self.N = N #row
         self.cell_size = 40
         self.board = []
+        self.margin = 20
         self.game_started = False
         self.turn = 1
         self.game_mode = game_mode
@@ -60,8 +61,8 @@ class GameScreen(BaseScreen):
         self.reset_button.grid(row=0, column=2, padx=10)
 
         #Canvas setup
-        w = N * self.cell_size  ##should add margin
-        h = M * self.cell_size
+        w = N * self.cell_size  + self.margin * 2
+        h = M * self.cell_size  + self.margin * 2
 
         self.canvas = tk.Canvas(self, bg="#363e47", width=w, height=h, highlightthickness=0)
         self.canvas.pack()
@@ -77,8 +78,8 @@ class GameScreen(BaseScreen):
             self.ai_player = "Minimax" #Going to change
 
     def click(self, event):
-        col = round((event.x) / self.cell_size)
-        row = round((event.y) / self.cell_size)
+        col = round((event.x - self.margin) / self.cell_size)
+        row = round((event.y - self.margin) / self.cell_size)
         if self.game_started and self.game_mode == "Human vs AI" and self.turn == 1:
             self.add_point(row, col, "black")
             if not self.check_win():
@@ -144,22 +145,22 @@ class GameScreen(BaseScreen):
             self.draw_point(row, col, color)
 
     def draw_point(self, row, col, color):
-        x = col * self.cell_size
-        y = row * self.cell_size
+        x = self.margin + (col * self.cell_size)
+        y = self.margin + (row * self.cell_size)
         r = int(self.cell_size / 2) - 6
         self.canvas.create_oval(x - r, y - r, x + r, y + r, fill=color, outline="black")
 
     def draw_grid(self):
         for i in range(self.M):
-            y = i * self.cell_size
-            x1 = 0
-            x2 = self.cell_size * (self.N - 1)
+            y = self.margin + (i * self.cell_size)
+            x1 = self.margin
+            x2 = self.cell_size * (self.N - 1) + self.margin
             self.canvas.create_line(x1, y, x2, y, fill="#b7d2f1")
 
         for j in range(self.N):
-            x = j * self.cell_size
-            y1 = 0
-            y2 = self.cell_size * (self.M - 1)
+            x = self.margin + (j * self.cell_size)
+            y1 = self.margin
+            y2 = self.cell_size * (self.M - 1) + self.margin
             self.canvas.create_line(x, y1, x, y2, fill="#b7d2f1")
 
 
