@@ -5,7 +5,7 @@ from game_engine import GameEngine
 from strategies.human import Human
 from strategies.dummy import Dummy
 import threading
-
+from strategies.alpha_beta import Alpha_Beta
 class GameScreen(BaseScreen):
     def __init__(self, parent_frame, ROWS, COLS, game_mode):
         super().__init__(parent_frame, fg_color="#363e47", width=800, height=600)
@@ -19,9 +19,9 @@ class GameScreen(BaseScreen):
         # players
         if self.game_mode == "Human vs AI":
             self.player1 = Human(ROWS, COLS, self.click)  # human
-            self.player2 = Dummy(ROWS, COLS)  # replace with minimax instance
+            self.player2 = Alpha_Beta(ROWS, COLS, 4)  # replace with minimax instance
         else:
-            self.player1 = Dummy(ROWS, COLS)   # replace with alpha-beta instance
+            self.player1 = Alpha_Beta(ROWS, COLS, 4)   # replace with alpha-beta instance
             self.player2 = Dummy(ROWS, COLS)   # replace with minimax instance
 
         self.game_engine = GameEngine(ROWS, COLS, (self.player1, self.player2))
