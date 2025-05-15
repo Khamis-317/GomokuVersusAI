@@ -1,4 +1,4 @@
-from movement import Movement
+from strategies.movement import Movement
 
 """
 class Alpha_Beta(Movement):
@@ -183,6 +183,9 @@ class Alpha_Beta(Movement):
     def __init__(self, rows, columns, depth):
         self.ROWS, self.COLUMNS, self.DEPTH = rows, columns, depth
 
+    def __str__(self):
+        return "Alpha Beta"
+    
     def extract_line(self, board, row, col, dr, dc, length):
         line = []
         for i in range(length):
@@ -213,16 +216,21 @@ class Alpha_Beta(Movement):
 
     def evaluate(self, board, maximizing) -> float:
         total = 0
+        player = 1
+        opp = 2
+        if maximizing:
+            player = 2
+            opp = 1
         for r in range(self.ROWS):
             for c in range(self.COLUMNS):
                 if board[r][c] != 0 and self.check_win(board, r, c, board[r][c]):
-                    return math.inf if board[r][c] == 2 else -math.inf
+                    return math.inf if board[r][c] == player else -math.inf
         for r in range(self.ROWS):
             for c in range(self.COLUMNS):
                 for dr, dc in directions:
                     line = self.extract_line(board, r - 5*dr, c - 5*dc, dr, dc, 11)
-                    total += self.pattern_score(line, 2)
-                    total -= self.pattern_score(line, 1) * 0.3
+                    total += self.pattern_score(line, player)
+                    total -= self.pattern_score(line, opp) * 0.3
         return total
 
     def get_all_available_moves(self, board):
@@ -237,10 +245,11 @@ class Alpha_Beta(Movement):
         return moves
 
     def prune(self, board, alpha, beta, depth, maximizing_player) -> tuple:
-        if depth == 0:
+        moves = self.get_all_available_moves(board)
+        if depth == 0 or len(moves) == 0:
             return None, None, self.evaluate(board, maximizing_player)
         best_move = (None, None, math.inf if not maximizing_player else -math.inf)
-        for x, y, _ in self.get_all_available_moves(board)[:6]:
+        for x, y, _ in moves[:6]:
             board[x][y] = 2 if maximizing_player else 1
             _, _, eval_score = self.prune(board, alpha, beta, depth - 1, not maximizing_player)
             board[x][y] = 0
@@ -254,9 +263,6 @@ class Alpha_Beta(Movement):
         return best_move
 
     def find_threat(self, board, player, length=4):
-        """
-        Find any `length`-in-a-row threat for `player` and return a winning/blocking cell.
-        """
         for r in range(self.ROWS):
             for c in range(self.COLUMNS):
                 if board[r][c] != 0: continue
@@ -268,9 +274,6 @@ class Alpha_Beta(Movement):
         return None
 
     def find_weaker_threat(self, board, player, target_count=3):
-        """
-        Find any 5-cell window containing `target_count` stones of `player` and return an empty to block.
-        """
         for dr, dc in directions:
             for r in range(self.ROWS):
                 for c in range(self.COLUMNS):
@@ -295,36 +298,28 @@ class Alpha_Beta(Movement):
         return None
 
     def make_move(self, board) -> tuple:
-        # 1. Win if possible
         move = self.find_threat(board, 2)
         if move: return move
-        # 2. Block opponent's immediate win
         move = self.find_threat(board, 1)
         if move: return move
-        # 3. Block opponent's 4-in-a-row
         move = self.find_weaker_threat(board, 1, 4)
         if move: return move
-        # 4. Block opponent's open 3-in-a-row (0,1,1,1,0)
         for dr, dc in directions:
             for r in range(self.ROWS):
                 for c in range(self.COLUMNS):
-                    for offset in range(3):  # check 5-window offsets 0-2
+                    for offset in range(3):
                         seq = []
                         for i in range(5):
                             rr = r + (offset + i) * dr
                             cc = c + (offset + i) * dc
                             seq.append(board[rr][cc] if 0 <= rr < self.ROWS and 0 <= cc < self.COLUMNS else -1)
                         if tuple(seq) == (0,1,1,1,0):
-                            # block either end
                             start = (r + offset * dr, c + offset * dc)
                             end = (r + (offset + 4) * dr, c + (offset + 4) * dc)
                             return start if board[start[0]][start[1]] == 0 else end
-        # 5. Block opponent's 3-in-a-row setup (generic)
-        #move = self.find_weaker_threat(board, 1, 3)
-        if move: return move
-        # 6. Otherwise alpha-beta
-        r, c, _ = self.prune([row[:] for row in board], -math.inf, math.inf, self.DEPTH, True)
-        return r, c #Otherwise alpha-beta
+        
+        r, c, _ = self.prune(board, -math.inf, math.inf, self.DEPTH, True)
+        return r, c
 
 
 
