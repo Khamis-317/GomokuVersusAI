@@ -10,7 +10,7 @@ class Minimax:
     
     #O(M * N) * 3 -> O(M * N)  
     def is_terminal(self, board) -> None:
-        return self.check_win(board,1) != 0 or self.check_win(board,-1) != 0 or not self.getAllAvaliableMove(board)
+        return self.check_win(board,self.AI_PLAYER) != 0 or self.check_win(board,self.HUMAN_PLAYER) != 0 or not self.getAllAvaliableMove(board)
     
     #O(M*N) -> O(MN)
     def check_win(self,board,player) -> bool:
@@ -37,9 +37,9 @@ class Minimax:
     #O(c)
     def evaluate_heuristic(self , count,  open_ends) -> int:
         if count == 5:
-            return 100000
+            return 1000000
         if count == 4:
-            return 10000 if open_ends == 2 else 5000
+            return 1000000 if open_ends == 2 else 5000
         if count == 3:
             return 1000 if open_ends == 2 else 300
         if count == 2:
@@ -49,7 +49,7 @@ class Minimax:
         return 0
     
     def evaluate_score(self, board):
-        return self.evaluate_player(board, self.AI_PLAYER) - 0.8 * self.evaluate_player(board, self.HUMAN_PLAYER)
+        return 4* self.evaluate_player(board, self.AI_PLAYER) - 1 * self.evaluate_player(board, self.HUMAN_PLAYER)
 
     def evaluate_player(self, board, player) -> int:
         total_score = 0
@@ -61,19 +61,6 @@ class Minimax:
                     count, open_ends = self.count_and_open_ends(board, i, j, dr, dc, player)
                     total_score += self.evaluate_heuristic(count, open_ends)
         return total_score
-
-    def score_sequence(self, count, open_ends):
-        if count >= 5:
-            return 1000000
-        if count == 4:
-            return 10000 if open_ends == 2 else 5000
-        if count == 3:
-            return 2000 if open_ends == 2 else 1000
-        if count == 2:
-            return 300 if open_ends == 2 else 30
-        if count == 1:
-            return 10
-        return 0
 
     def count_and_open_ends(self, board, r, c, dr, dc, player):
         count = 0
@@ -146,7 +133,7 @@ class GomokuGame:
         self.cols = cols
         self.board = [[0 for _ in range(cols)] for _ in range(rows)]
         self.ai = Minimax(cols, rows, depth)
-    
+
     def display_board_with_emojis(self):
         print("   " + " ".join(f"{i:2}" for i in range(self.cols)))
         for i, row in enumerate(self.board):
@@ -204,20 +191,3 @@ class GomokuGame:
 if __name__ == "__main__":
     game = GomokuGame(rows=15, cols=15, depth=2)
     game.play()
-
-
-
-
-def evaluate_heuristic(self , count,  open_ends) -> int:
-        if count == 5:
-            return 100000
-        if count == 4:
-            return 10000 if open_ends == 2 else 5000
-        if count == 3:
-            return 1000 if open_ends == 2 else 300
-        if count == 2:
-            return 100 if open_ends == 2 else 30
-        if count == 1:
-            return 10
-        return 0
-    
