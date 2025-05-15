@@ -37,9 +37,9 @@ class Minimax:
     #O(c)
     def evaluate_heuristic(self , count,  open_ends) -> int:
         if count == 5:
-            return 1000000
+            return 1000000000
         if count == 4:
-            return 1000000 if open_ends == 2 else 5000
+            return 10000000 if open_ends == 2 else 5000
         if count == 3:
             return 1000 if open_ends == 2 else 300
         if count == 2:
@@ -47,9 +47,9 @@ class Minimax:
         if count == 1:
             return 10
         return 0
-    
+   
     def evaluate_score(self, board):
-        return 4* self.evaluate_player(board, self.AI_PLAYER) - 1 * self.evaluate_player(board, self.HUMAN_PLAYER)
+        return  self.evaluate_player(board, self.AI_PLAYER) - 1 * self.evaluate_player(board, self.HUMAN_PLAYER)
 
     def evaluate_player(self, board, player) -> int:
         total_score = 0
@@ -83,11 +83,20 @@ class Minimax:
 
         return count, open_ends
 
-    
+    dir = [(1,0),(0,1),(1,1),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1)]
     #O(cSize * rSize) -> O(M * N)  
     def getAllAvaliableMove(self,board):
         #Return avaliable move
-        return [(i, j) for i in range(self.rSize) for j in range(self.cSize) if board[i][j] == 0]
+        list = []
+        for i in range(self.rSize):
+            for j in range(self.cSize):
+                if(board[i][j] == 0):
+                    for k,l in self.dir:
+                        ni,nj = i+k,j+l
+                        if(0<=ni<self.rSize and 0<=nj<self.cSize and board[ni][nj]!= 0):
+                            list.append((i,j))
+                            break
+        return list if list else [(i, j) for i in range(self.rSize)for j in range(self.cSize) if board[i][j] == 0]                                        
         
     def minimax_algo(self, board, maxPlayer, depth):
     # Terminal node or depth reached
@@ -189,5 +198,5 @@ class GomokuGame:
                     break
 
 if __name__ == "__main__":
-    game = GomokuGame(rows=15, cols=15, depth=2)
+    game = GomokuGame(rows=15, cols=15, depth=3)
     game.play()
