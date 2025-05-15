@@ -55,6 +55,7 @@ class StartMenu(BaseScreen):
             self.hide()
             game_screen.show()
 
+
     def show_instructions(self):
         instructions_screen = Instructions(self.app_frame)
         self.hide()

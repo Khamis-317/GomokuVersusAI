@@ -1,5 +1,5 @@
 from time import sleep
-
+from strategies.alpha_beta import Alpha_Beta
 class GameEngine:
     def __init__(self, ROWS, COLS, players):
         self.M = ROWS  # number of rows
@@ -64,7 +64,6 @@ class GameEngine:
                 move = self.player1.make_move(self.board)
             else:
                 move = self.player2.make_move(self.board)
-
             if move is not None:
                 row, col = move
                 if self.mark_valid_move(row, col):

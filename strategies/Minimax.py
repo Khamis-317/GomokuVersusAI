@@ -102,7 +102,7 @@ class Minimax:
     def minimax_algo(self, board, maxPlayer, depth):
     # Terminal node or depth reached
         if self.is_terminal(board) or depth == 0:
-            return (self.evaluate_score(board), (None, None))
+            return (self.evaluate_score(board,depth), (None, None))
 
         best_move = (None, None)
 
