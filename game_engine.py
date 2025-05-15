@@ -1,22 +1,22 @@
 from time import sleep
 
 class GameEngine:
-    def __init__(self, ROWS, COLS, game_mode):
+    def __init__(self, ROWS, COLS, players):
         self.M = ROWS  # number of rows
         self.N = COLS  # number of cols
+        # board initialization
         self.board = []
+        for i in range(ROWS):
+            row = [0] * COLS
+            self.board.append(row)
         self.round_count = 0
         self.running = False
+        self.player1 = players[0]
+        self.player2 = players[1]
         self.turn = 1
-        if game_mode == "Human vs AI":
-            self.player1 = None  # human
-            self.player2 = None  # replace with minimax instance
-        else:
-            self.player1 = None  # replace with alpha-beta instance
-            self.player2 = None  # replace with minimax instance
-        # self.game_mode = game_mode
+        self.end_result = None
 
-    def start_game(self):
+    def start(self):
         self.running = True
 
     # mark the game board if the move is valid
@@ -48,41 +48,42 @@ class GameEngine:
                 else:
                     break
             if count == WINNING_SEQ:
-                x1 = col * self.cell_size + self.margin
-                y1 = row * self.cell_size + self.margin
-                x2 = c * self.cell_size + self.margin
-                y2 = r * self.cell_size + self.margin
-                # return the start and end of the winning sequence
-                return ((x1, y1), (x2, y2))
+                start = (col, row)
+                end = (c, r)
+                # return the start and end points of the winning sequence
+                return (start, end)
         return None
 
     def is_board_full(self):
         return self.round_count == self.M*self.N
     
-    def update(self):
+    def game_loop(self, draw_point):
         while self.running:
             move = None
-            if(self.turn == 1):
-                move = self.player1.make_move()
+            if self.turn == 1:
+                move = self.player1.make_move(self.board)
             else:
-                move = self.player2.make_move()
+                move = self.player2.make_move(self.board)
 
             if move is not None:
-                if self.mark_valid_move(move[0], move[1]):
+                row, col = move
+                if self.mark_valid_move(row, col):
+                    color = "white" if self.turn == 1 else "red"
                     self.round_count += 1
-                    win = self.check_win()
+                    draw_point(row, col, color)
+
+                    win = self.check_win(row, col)
                     if win:
                         self.running = False
                         # winner's turn, x1, y1, x2, y2 are returned
-                        return self.turn, win[0][0], win[0][1], win[1][0], win[1][1]
-                    else:
-                        if self.is_board_full():
-                            self.running = False
-                            return None
-                        turn = 1 if turn == 2 else 1
-                        sleep(0.3)
-                        
+                        return self.turn, win[0], win[1]
 
+                    if self.is_board_full():
+                        self.running = False
+                        return None
+
+                    self.turn = 1 if self.turn == 2 else 2
+                    sleep(0.3)
     
     def finish_game(self):
         self.running = False
