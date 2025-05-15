@@ -100,6 +100,10 @@ class Minimax:
         
     def minimax_algo(self, board, maxPlayer, depth):
     # Terminal node or depth reached
+        if self.check_win(board , self.AI_PLAYER):
+            return(float('inf'),(None,None))
+        if self.check_win(board , self.HUMAN_PLAYER):
+            return(float('-inf'),(None,None))
         if self.is_terminal(board) or depth == 0:
             return (self.evaluate_score(board), (None, None))
 
