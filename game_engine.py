@@ -83,7 +83,11 @@ class GameEngine:
                         return None
 
                     self.turn = 1 if self.turn == 2 else 2
-                    sleep(0.3)
+                    sleep(0.1)
     
-    def finish_game(self):
-        self.running = False
+    def reset(self):
+        self.turn = 1
+        self.round_count = 0
+        for i in range(self.M):
+            for j in range(self.N):
+                self.board[i][j] = 0

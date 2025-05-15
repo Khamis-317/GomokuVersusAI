@@ -14,25 +14,17 @@ class GameScreen(BaseScreen):
         self.N = COLS  # number of cols
         self.cell_size = 40
         self.margin = 20
-        self.board = []
-        self.round_count = 0
-        self.game_started = False
-        self.turn = 1
         self.game_mode = game_mode
 
         # players
         if self.game_mode == "Human vs AI":
-            self.player1 = Human(ROWS, COLS, self.get_click)  # human
+            self.player1 = Human(ROWS, COLS, self.click)  # human
             self.player2 = Dummy(ROWS, COLS)  # replace with minimax instance
         else:
             self.player1 = Dummy(ROWS, COLS)   # replace with alpha-beta instance
             self.player2 = Dummy(ROWS, COLS)   # replace with minimax instance
 
         self.game_engine = GameEngine(ROWS, COLS, (self.player1, self.player2))
-
-        for i in range(ROWS):
-            row = [0] * COLS
-            self.board.append(row)
 
         #Title
         ctk.CTkLabel(
@@ -88,13 +80,17 @@ class GameScreen(BaseScreen):
         self.canvas = tk.Canvas(self, bg="#363e47", width=w, height=h, highlightthickness=0)
         self.canvas.pack()
         self.draw_grid()
-        self.canvas.bind("<Button-1>", self.get_click) #catch left click on canvas
+        self.canvas.bind("<Button-1>", self.click) #catch left click on canvas
 
 
-    def get_click(self, event):
-        col = round((event.x - self.margin) / self.cell_size)
-        row = round((event.y - self.margin) / self.cell_size)
-        return row, col
+    def click(self, event):
+        if self.game_mode == "Human vs AI" and self.game_engine.turn == 1:
+            col = round((event.x - self.margin) / self.cell_size)
+            row = round((event.y - self.margin) / self.cell_size)
+            # set the position of the player move
+            self.player1.set_click_pos(row, col)
+            # set click_event flag to wait for a click at the gameloop thread
+            self.player1.click_event.set()
 
     # running the game loop in another thread to prevent it 
     # from blocking the GUI as it runs on the main thread
@@ -105,7 +101,6 @@ class GameScreen(BaseScreen):
             winner_turn, start, end = end_result
             self.draw_winning_sequence(start, end)
             self.display_winner(winner_turn)
-            print("player", winner_turn, "is the winner")
         else:
             self.display_draw_message()
 
@@ -123,19 +118,14 @@ class GameScreen(BaseScreen):
 
 
     def reset_game(self):
-        self.game_started = False
         self.start_button.configure(state="normal")
-        for i in range(self.M):
-            for j in range(self.N):
-                self.board[i][j] = 0
+        self.game_engine.reset()
         self.canvas.delete("all")
         self.draw_grid()
-        self.turn = 1
         self.winner_label.pack_forget()
         self.draw_label.pack_forget()
         self.back_button.configure(state="normal")
         self.reset_button.configure(state="disabled")
-        self.round_count = 0
 
     def back_to_menu(self):
         from gui.start_menu import StartMenu
@@ -143,17 +133,7 @@ class GameScreen(BaseScreen):
         start_menu = StartMenu(self.parent_frame)
         start_menu.show()
 
-    def is_board_full(self):
-        return self.round_count == self.M*self.N
     # Canvas Drawing
-
-    def add_point(self, row, col):
-        if 0 <= row < self.M and 0 <= col < self.N and self.board[row][col] == 0:
-            self.board[row][col] = 1 if self.turn == 1 else 2
-            return True
-        return False
-
-
     def draw_point(self, row, col, color):
         x = self.margin + (col * self.cell_size)
         y = self.margin + (row * self.cell_size)
