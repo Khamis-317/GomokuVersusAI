@@ -88,7 +88,6 @@ class Minimax:
     def getAllAvaliableMove(self,board):
         #Return avaliable move
         list = []
-        empty = [(i, j) for i in range(self.rSize)for j in range(self.cSize) if board[i][j] == 0]
         for i in range(self.rSize):
             for j in range(self.cSize):
                 if(board[i][j] == 0):
@@ -97,12 +96,12 @@ class Minimax:
                         if(0<=ni<self.rSize and 0<=nj<self.cSize and board[ni][nj]!= 0):
                             list.append((i,j))
                             break
-        return list if list else empty                                         
+        return list if list else [(i, j) for i in range(self.rSize)for j in range(self.cSize) if board[i][j] == 0]                                        
         
     def minimax_algo(self, board, maxPlayer, depth):
     # Terminal node or depth reached
         if self.is_terminal(board) or depth == 0:
-            return (self.evaluate_score(board,depth), (None, None))
+            return (self.evaluate_score(board), (None, None))
 
         best_move = (None, None)
 
