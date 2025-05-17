@@ -118,7 +118,7 @@ class Minimax:
 
                 if eval_score > maxEval:
                     maxEval = eval_score
-                    best_move = move
+                    best_move = move if move[0] != None and move[1] != None else best_move
 
             return (maxEval, best_move)
 
@@ -131,7 +131,7 @@ class Minimax:
 
                 if eval_score < minEval:
                     minEval = eval_score
-                    best_move = move
+                    best_move = move if move[0] != None and move[1] != None else best_move
 
             return (minEval, best_move)
     def make_move(self, board):
