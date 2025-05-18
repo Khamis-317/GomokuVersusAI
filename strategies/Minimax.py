@@ -177,6 +177,7 @@ class Minimax:
         return None
 
     
+    
     def make_move(self, board):
         #for MN
         win_mov = self.find_winning_move(board ,self.AI_PLAYER)
