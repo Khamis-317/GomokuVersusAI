@@ -34,16 +34,36 @@ class Minimax:
                 break
         return True if count == 5 else False
     
+    def get_top_k_moves(self, board, k=6):
+        moves = self.getAllAvaliableMove(board)
+        move_scores = []
+
+        for move in moves:
+            r, c = move
+            board[r][c] = self.AI_PLAYER
+            score = self.evaluate_score(board)
+            move_scores.append((score, move))
+            board[r][c] = 0
+
+        move_scores.sort(reverse=True)
+        top_moves = [move for _, move in move_scores[:k]]
+        return top_moves
+
     #O(c)
-    def evaluate_heuristic(self , count,  open_ends) -> int:
+    def evaluate_heuristic(self , count, r_open_ends , l_open_ends) -> int:
         if count == 5:
             return 1000000000
         if count == 4:
-            return 10000000 if open_ends == 2 else 5000
+            return 10000000 if r_open_ends >= 1 and  l_open_ends>=1 else 300000
         if count == 3:
-            return 1000 if open_ends == 2 else 300
+            if  r_open_ends == 2 and  l_open_ends == 2:
+                return 100000
+            elif  r_open_ends == 1 and  l_open_ends == 1: 
+                return 1000
+            else:
+                return 300
         if count == 2:
-            return 100 if open_ends == 2 else 30
+            return 100 if r_open_ends >= 1 and  l_open_ends >= 1 else 30
         if count == 1:
             return 10
         return 0
@@ -58,8 +78,8 @@ class Minimax:
                 if board[i][j] != player:
                     continue
                 for dr, dc in directions:
-                    count, open_ends = self.count_and_open_ends(board, i, j, dr, dc, player)
-                    total_score += self.evaluate_heuristic(count, open_ends)
+                    count, r_open_ends , l_open_ends = self.count_and_open_ends(board, i, j, dr, dc, player)
+                    total_score += self.evaluate_heuristic(count, r_open_ends , l_open_ends)
         return total_score
 
     def count_and_open_ends(self, board, r, c, dr, dc, player):
@@ -73,15 +93,20 @@ class Minimax:
             else:
                 break
 
-        open_ends = 0
+        l_open_ends = 0
+        r_open_ends = 0
         before_r, before_c = r - dr, c - dc
         after_r, after_c = r + dr * count, c + dc * count
         if 0 <= before_r < self.rSize and 0 <= before_c < self.cSize and board[before_r][before_c] == 0:
-            open_ends += 1
+            l_open_ends += 1
         if 0 <= after_r < self.rSize and 0 <= after_c < self.cSize and board[after_r][after_c] == 0:
-            open_ends += 1
+            r_open_ends += 1
+        if 0 <= before_r-dr < self.rSize and 0 <= before_c-dc < self.cSize and board[before_r-dr][before_c -dc] == 0:
+            l_open_ends += 1
+        if 0 <= after_r+dr < self.rSize and 0 <= after_c+dc < self.cSize and board[after_r+dr][after_c+dc] == 0:
+            r_open_ends += 1
 
-        return count, open_ends
+        return count,r_open_ends,l_open_ends
 
     dir = [(1,0),(0,1),(1,1),(1,-1),(0,-1),(-1,-1),(-1,0),(-1,1)]
     #O(cSize * rSize) -> O(M * N)  
@@ -111,31 +136,55 @@ class Minimax:
 
         if maxPlayer:
             maxEval = float('-inf')
-            for move in self.getAllAvaliableMove(board):
+            for move in self.get_top_k_moves(board, k=6):
                 board[move[0]][move[1]] = self.AI_PLAYER  # Player 1
                 eval_score, _ = self.minimax_algo(board, False, depth - 1)
                 board[move[0]][move[1]] = 0  # Undo move
 
                 if eval_score > maxEval:
                     maxEval = eval_score
-                    best_move = move
+                    best_move = move if move[0] != None and move[1] != None else best_move
 
             return (maxEval, best_move)
 
         else:
             minEval = float('inf')
-            for move in self.getAllAvaliableMove(board):
+            for move in self.get_top_k_moves(board, k=6):
                 board[move[0]][move[1]] = self.HUMAN_PLAYER  
                 eval_score, _ = self.minimax_algo(board, True, depth - 1)
                 board[move[0]][move[1]] = 0  # Undo move
 
                 if eval_score < minEval:
                     minEval = eval_score
-                    best_move = move
+                    best_move = move if move[0] != None and move[1] != None else best_move
 
             return (minEval, best_move)
+        
+    def find_winning_move(self,board ,player):
+        for move in self.getAllAvaliableMove(board):
+            r, c = move
+            board[r][c] = player
+            if self.check_win(board,player):
+                board[r][c] = 0
+                return move  # Take the win
+            else:
+                for dr ,dc in directions:
+                    cnt,rop,lop = self.count_and_open_ends(board,r,c,dr,dc,player)
+                    if cnt == 4 and rop>=1 and lop>=1:
+                        board[r][c] = 0
+                        return move
+            board[r][c] = 0
+        return None
+
+    
     def make_move(self, board):
         #for MN
+        win_mov = self.find_winning_move(board ,self.AI_PLAYER)
+        if win_mov:
+            return win_mov
+        los_mov = self.find_winning_move(board ,self.HUMAN_PLAYER)
+        if los_mov:
+            return los_mov
         _, move = self.minimax_algo(board, False, self.maxDepth) 
         return move
 
@@ -202,5 +251,5 @@ class GomokuGame:
                     break
 
 if __name__ == "__main__":
-    game = GomokuGame(rows=15, cols=15, depth=3)
+    game = GomokuGame(rows=15, cols=15, depth=4)
     game.play()
